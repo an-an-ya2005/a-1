@@ -1,0 +1,33 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3000,
+            "driver": "MySQL",
+            "database": "clinic_appointments",
+            "username": "myuser",
+            "name": "ACE\\SQLEXPRESS",
+            "password": ""
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3000,
+            "driver": "MySQL",
+            "name": "clinic",
+            "database": "clinic_appointments",
+            "username": "myuser",
+            "connectionTimeout": 30,
+            "askForPassword": true
+        }
+    ]
+}
