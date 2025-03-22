@@ -1,43 +1,71 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Table Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+        h1 { color: #333; }
+        button { margin-top: 10px; padding: 10px; cursor: pointer; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f0f0f0; }
+        textarea { width: 100%; height: 100px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>SQL Database Viewer</h1>
+    <h2>Available Tables</h2>
+    <button onclick="getTables()">Load Tables</button>
+    <ul id="tables"></ul>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <h2>Run Custom SQL Query</h2>
+    <textarea id="query" placeholder="Enter your SQL query here"></textarea>
+    <button onclick="runQuery()">Run Query</button>
+    <h2>Query Results</h2>
+    <div id="results"></div>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    <script>
+        async function getTables() {
+            try {
+                const response = await fetch('/tables');
+                const tables = await response.json();
+                const tableList = document.getElementById('tables');
+                tableList.innerHTML = tables.map(table => `<li>${table.TABLE_NAME}</li>`).join('');
+            } catch (error) {
+                console.error('Error fetching tables:', error);
+            }
+        }
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+        async function runQuery() {
+            const query = document.getElementById('query').value;
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sqlQuery: query })
+                });
+                const data = await response.json();
+                const resultsDiv = document.getElementById('results');
+
+                if (response.ok) {
+                    if (data.length === 0) {
+                        resultsDiv.innerHTML = '<p>No results found.</p>';
+                    } else {
+                        const headers = Object.keys(data[0]);
+                        const rows = data.map(row => `<tr>${headers.map(header => `<td>${row[header]}</td>`).join('')}</tr>`).join('');
+                        resultsDiv.innerHTML = `<table><tr>${headers.map(header => `<th>${header}</th>`).join('')}</tr>${rows}</table>`;
+                    }
+                } else {
+                    resultsDiv.innerHTML = `<p style='color: red;'>${data.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p style='color: red;'>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
 </html>
